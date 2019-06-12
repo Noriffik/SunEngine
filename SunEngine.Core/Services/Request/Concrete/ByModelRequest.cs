@@ -1,4 +1,4 @@
-namespace SunEngine.Core.Services.Request
+namespace SunEngine.Core.Services.Request.Concrete
 {
     public class ByModelRequest<T> : BaseRequest
     {

@@ -1,7 +1,6 @@
 namespace SunEngine.Core.Services.Request
 {
-    public class BaseRequest
+    public abstract class BaseRequest
     {
-        
     }
 }
