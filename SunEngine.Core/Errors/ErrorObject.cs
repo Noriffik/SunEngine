@@ -13,15 +13,15 @@ namespace SunEngine.Core.Errors
     
     public class ErrorObject
     {
-        public string Code { get; }
+        public string Code { get; private set; }
 
-        public string Description { get; }
+        public string Description { get; private set; }
 
-        public string Message { get; }
+        public string Message { get;  private set;}
 
-        public string StackTrace { get; }
+        public string StackTrace { get; private set; }
 
-        public ErrorType Type { get; }
+        public ErrorType Type { get; private set; }
 
         public ErrorObject(string code, string description, ErrorType type)
         {
@@ -30,22 +30,15 @@ namespace SunEngine.Core.Errors
             Type = type;
         }
         
-        public ErrorObject(string code, string description, ErrorType type, string message)
+        public ErrorObject(string code, string description, ErrorType type, string message): this(code, description, type)
         {
-            Code = code;
-            Description = description;
-            Type = type;
             Message = message;
         }
 
-        public ErrorObject(string code, string description, ErrorType type, Exception exception)
+        public ErrorObject(string code, string description, ErrorType type, Exception exception): this(code, description, type)
         {
-            Code = code;
-            Description = description;
-            Type = type;
             Message = exception.Message;
             StackTrace = exception.StackTrace;
         }
-        
     }
 }

@@ -6,11 +6,9 @@ namespace SunEngine.Core.Errors
 {
     public class ErrorView
     {
-        public IList<ErrorObject> Errors { get; } = new List<ErrorObject>();
+        public IList<ErrorObject> Errors => new List<ErrorObject>();
 
-        public ErrorView()
-        {
-        }
+        public ErrorView(){ }
 
         public ErrorView(string code, string description, ErrorType type)
         {
