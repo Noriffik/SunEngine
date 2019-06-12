@@ -8,12 +8,12 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SunEngine.Core.Configuration.Options;
+using SunEngine.Core.Services.Response.Concrete;
 
 namespace SunEngine.Core.Services
 {
     public interface IImagesService
     {
-        string GetAllowedExtension(string fileName);
         Task<FileAndDir> SaveImageAsync(IFormFile file, ResizeOptions resizeOptions);
         FileAndDir SaveBitmapImage(Stream stream, ResizeOptions ro, string ext);
     }
@@ -28,38 +28,42 @@ namespace SunEngine.Core.Services
         protected readonly ImagesOptions imagesOptions;
         protected readonly IHostingEnvironment env;
 
-
-        public ImagesService(
-            IOptions<ImagesOptions> imageOptions,
-            IImagesNamesService imagesNamesService,
-            IHostingEnvironment env)
+        public ImagesService(IOptions<ImagesOptions> imageOptions, ImagesNamesService imagesNamesService, IHostingEnvironment env)
         {
             this.imagesOptions = imageOptions.Value;
             this.env = env;
             this.imagesNamesService = imagesNamesService;
         }
 
-        public virtual string GetAllowedExtension(string fileName)
+        private string GetAllowedExtension(string fileName)
         {
-            string ext = Path.GetExtension(fileName).ToLower();
-            if (ext == ".jpeg")
-                return ".jpg";
-            if (ext == ".jpg" || ext == ".png" || ext == ".gif")
-                return ext;
+            var ext = Path.GetExtension(fileName).ToLower();
+            switch (ext)
+            {
+                case ".jpeg":
+                    return ".jpg";
+                case ".jpg":
+                case ".png":
+                case ".gif":
+                    return ext;
+            }
+
             if (imagesOptions.AllowSvgUpload && ext == ".svg")
                 return ext;
-
+            
             return null;
         }
 
         public virtual async Task<FileAndDir> SaveImageAsync(IFormFile file, ResizeOptions resizeOptions)
         {
             var ext = GetAllowedExtension(file.FileName);
-            if (ext == null)
-                throw new Exception($"Not allowed extension");
-
-            if (ext == ".svg" && file.Length >= MaxSvgSizeBytes)
-                throw new Exception($"Svg max size is {MaxSvgSizeBytes / 1024} kb");
+            switch (ext)
+            {
+                case null:
+                    throw new ArgumentNullException($"Not allowed extension");
+                case ".svg" when file.Length >= MaxSvgSizeBytes:
+                    throw new Exception($"Svg max size is {MaxSvgSizeBytes / 1024} kb");
+            }
 
             var fileAndDir = imagesNamesService.GetNewImageNameAndDir(ext);
             var dirFullPath = Path.Combine(env.WebRootPath, imagesOptions.UploadDir, fileAndDir.Dir);
