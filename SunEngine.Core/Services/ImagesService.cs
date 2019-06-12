@@ -20,19 +20,19 @@ namespace SunEngine.Core.Services
 
     public class ImagesService : IImagesService
     {
-        protected static readonly int MaxSvgSizeBytes = 40 * 1024;
+        private static readonly int MaxSvgSizeBytes = 40 * 1024;
 
-        protected static readonly object lockObject = new object();
+        private static readonly object _lockObject = new object();
 
-        protected readonly IImagesNamesService imagesNamesService;
-        protected readonly ImagesOptions imagesOptions;
-        protected readonly IHostingEnvironment env;
+        private readonly IImagesNamesService _imagesNamesService;
+        private readonly ImagesOptions _imagesOptions;
+        private readonly IHostingEnvironment _environment;
 
         public ImagesService(IOptions<ImagesOptions> imageOptions, ImagesNamesService imagesNamesService, IHostingEnvironment env)
         {
-            this.imagesOptions = imageOptions.Value;
-            this.env = env;
-            this.imagesNamesService = imagesNamesService;
+            _imagesOptions = imageOptions.Value ?? throw new ArgumentNullException(nameof(imageOptions));
+            _imagesNamesService = imagesNamesService ?? throw new ArgumentNullException(nameof(imagesNamesService));
+            _environment = env;
         }
 
         private string GetAllowedExtension(string fileName)
@@ -48,7 +48,7 @@ namespace SunEngine.Core.Services
                     return ext;
             }
 
-            if (imagesOptions.AllowSvgUpload && ext == ".svg")
+            if (_imagesOptions.AllowSvgUpload && ext == ".svg")
                 return ext;
             
             return null;
@@ -65,24 +65,32 @@ namespace SunEngine.Core.Services
                     throw new Exception($"Svg max size is {MaxSvgSizeBytes / 1024} kb");
             }
 
-            var fileAndDir = imagesNamesService.GetNewImageNameAndDir(ext);
-            var dirFullPath = Path.Combine(env.WebRootPath, imagesOptions.UploadDir, fileAndDir.Dir);
+            var fileAndDir = _imagesNamesService.GetNewImageNameAndDir(ext);
+            var dirFullPath = Path.Combine(_environment.WebRootPath, _imagesOptions.UploadDir, fileAndDir.Dir);
             var fullFileName = Path.Combine(dirFullPath, fileAndDir.File);
 
-            lock (lockObject)
+            lock (_lockObject)
                 if (!Directory.Exists(dirFullPath))
                     Directory.CreateDirectory(dirFullPath);
 
-            if (ext == ".svg")
-                using (var stream = new FileStream(fullFileName, FileMode.Create))
-                    await file.CopyToAsync(stream);
-            else
+            switch (ext)
             {
-                using (var stream = file.OpenReadStream())
-                using (Image<Rgba32> image = Image.Load(stream))
+                case ".svg":
                 {
-                    image.Mutate(x => x.Resize(resizeOptions));
-                    image.Save(fullFileName);
+                    using (var stream = new FileStream(fullFileName, FileMode.Create))
+                        await file.CopyToAsync(stream);
+                    break;
+                }
+
+                default:
+                {
+                    using (var stream = file.OpenReadStream())
+                    using (var image = Image.Load(stream))
+                    {
+                        image.Mutate(x => x.Resize(resizeOptions));
+                        image.Save(fullFileName);
+                    }
+                    break;
                 }
             }
 
@@ -91,12 +99,12 @@ namespace SunEngine.Core.Services
 
         public virtual FileAndDir SaveBitmapImage(Stream stream, ResizeOptions ro, string ext)
         {
-            using (Image<Rgba32> image = Image.Load(stream))
+            using (var image = Image.Load(stream))
             {
-                var fileAndDir = imagesNamesService.GetNewImageNameAndDir(ext);
-                var dirFullPath = Path.Combine(env.WebRootPath, imagesOptions.UploadDir, fileAndDir.Dir);
+                var fileAndDir = _imagesNamesService.GetNewImageNameAndDir(ext);
+                var dirFullPath = Path.Combine(_environment.WebRootPath, _imagesOptions.UploadDir, fileAndDir.Dir);
 
-                lock (lockObject)
+                lock (_lockObject)
                     if (!Directory.Exists(dirFullPath))
                         Directory.CreateDirectory(dirFullPath);
 
