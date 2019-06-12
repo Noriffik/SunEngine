@@ -95,10 +95,9 @@ namespace SunEngine.Core.Managers
 
             material.Preview = preview;
 
-            if (isDescriptionEditable)
-                material.Description = SimpleHtmlToText.ClearTags(sanitizer.Sanitize(material.Description));
-            else
-                material.Description = description;
+            material.Description = isDescriptionEditable 
+                ? SimpleHtmlToText.ClearTags(sanitizer.Sanitize(material.Description)) 
+                : description;
 
             using (db.BeginTransaction())
             {
@@ -146,9 +145,7 @@ namespace SunEngine.Core.Managers
 
         public virtual bool IsNameValid(string name)
         {
-            if (int.TryParse(name, out _))
-                return false;
-            return nameValidator.IsMatch(name);
+            return !int.TryParse(name, out _) && nameValidator.IsMatch(name);
         }
 
         public virtual Task<bool> IsNameInDbAsync(string name)

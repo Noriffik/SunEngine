@@ -11,16 +11,16 @@ namespace SunEngine.Core.Errors
         {
             context.Response.StatusCode = 500;
             context.Response.ContentType = "application/json";
-                    
-            var exceptionHandlerPathFeature = 
+
+            var exceptionHandlerPathFeature =
                 context.Features.Get<IExceptionHandlerPathFeature>();
 
-            if (exceptionHandlerPathFeature.Error !=null)
+            if (exceptionHandlerPathFeature.Error != null)
             {
                 ErrorView errorView = ErrorView.ServerError(exceptionHandlerPathFeature.Error);
-                        
+
                 await context.Response.WriteAsync(WebJson.Serialize(errorView));
-            }     
+            }
         } 
     }
 }

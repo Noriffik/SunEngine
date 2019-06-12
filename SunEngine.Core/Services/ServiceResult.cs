@@ -44,7 +44,7 @@ namespace SunEngine.Core.Services
             };
         }
         
-        public static UserServiceResult BadResult(ErrorView error = null)
+        public new static UserServiceResult BadResult(ErrorView error = null)
         {
             return new UserServiceResult
             {

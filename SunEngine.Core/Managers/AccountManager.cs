@@ -71,7 +71,7 @@ namespace SunEngine.Core.Managers
             return ServiceResult.OkResult();
         }
 
-        public virtual string GenerateChangeEmailToken(User user, string email)
+        protected virtual string GenerateChangeEmailToken(User user, string email)
         {
             List<Claim> claims = new List<Claim>
             {

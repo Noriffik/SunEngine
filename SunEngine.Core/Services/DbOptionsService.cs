@@ -6,7 +6,7 @@ namespace SunEngine.Core.Services
 {
     public class DbOptionsService
     {
-        private DataBaseConnection db;
+        private readonly DataBaseConnection db;
 
         public DbOptionsService(DataBaseConnection db) => this.db = db;
 

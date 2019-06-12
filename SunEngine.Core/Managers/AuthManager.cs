@@ -29,7 +29,7 @@ namespace SunEngine.Core.Managers
         protected readonly SunUserManager userManager;
         protected readonly GlobalOptions globalOptions;
         protected readonly IEmailSenderService EmailSenderService;
-        protected readonly ILogger logger;
+        protected readonly ILogger<AccountController> logger;
 
 
         public AuthManager(
@@ -37,14 +37,13 @@ namespace SunEngine.Core.Managers
             IEmailSenderService emailSenderService,
             DataBaseConnection db,
             IOptions<GlobalOptions> globalOptions,
-            ILoggerFactory loggerFactory) : base(db)
+            ILogger<AccountController> loggerFactory) : base(db)
         {
             this.userManager = userManager;
             this.globalOptions = globalOptions.Value;
             this.EmailSenderService = emailSenderService;
-            logger = loggerFactory.CreateLogger<AccountController>();
+            logger = loggerFactory;
         }
-
 
         public async Task<UserServiceResult> LoginAsync(string nameOrEmail, string password)
         {
@@ -117,7 +116,6 @@ namespace SunEngine.Core.Managers
                             new ErrorView("EmailSendError", "Can not send email", ErrorType.System,
                                 exception));
                     }
-
 
                     logger.LogInformation($"Sent email confirmation email (id: {user.Id})");
                 }

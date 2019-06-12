@@ -40,12 +40,12 @@ namespace SunEngine.Core.DataBase
 
         public DataConnection GetConnection()
         {
-            return new DataBaseConnection(dataProvider,connectionString,mappingSchema);
+            return new DataBaseConnection(dataProvider, connectionString, mappingSchema);
         }
 
         public DataBaseConnection CreateDb()
         {
-            return new DataBaseConnection(dataProvider,connectionString,mappingSchema);
+            return new DataBaseConnection(dataProvider, connectionString, mappingSchema);
         }
     }
 }
